@@ -1,270 +1,515 @@
-# LabBuddy · Project Plan
+# LabBuddy · Team Project Plan
 
-> **One dashboard. Every lab. Less last-minute stress.**
+> **One dashboard for lab preparation, partner tasks, resources, and deadlines.**
 >
-> A web app for engineering and computer science students to prepare for labs, divide partner tasks, organize resources, and track deadlines.
+> A manageable project for a second-year Ontario Tech Software Engineering team, building on Java, C++, and web programming coursework.
 
-**Status:** Planning · **Audience:** Engineering and CS students · **Target:** A focused, working sprint demo
+**Status:** Proposed plan; implementation has not started.
 
----
+**Updated:** November 10, 2026.
 
-## 1 · The idea
+**Recommended stack:** HTML, CSS, JavaScript, Cloudflare Workers, D1, and Access.
 
-Lab instructions, report requirements, partner messages, and resource files often live in different places. LabBuddy brings the work for each lab into one shared space so students can quickly answer:
+**Java:** An optional template tool, with a hosted-backend alternative explained below.
 
-- **What is due next?** See upcoming lab sessions and report deadlines.
-- **Am I ready?** Finish prerequisites and pre-lab checklist items.
-- **Who is doing what?** Assign tasks and see partner progress.
-- **Where is that file?** Find manuals, code, and CAD resource links by course.
+## 1 · Read this first
 
-### The student experience
+We want a working app that two students can use together. Build one complete workflow at a time: create a lab, add tasks, save the work, and share it with a partner.
 
-Read each diagram **from top to bottom**. Large labels, dark fills, and bright outlines are designed for GitHub dark mode. Text labels also explain each step without relying on color.
+Java and web programming are near final-exam stage, so this plan treats them as skills we can apply. We can check gaps as we work. Cloud deployment, SQL, and application permissions are the main new areas.
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#58A6FF","lineColor":"#E6EDF3","fontSize":"24px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":40,"rankSpacing":55}}}%%
-flowchart TD
-    accTitle: LabBuddy student journey
-    accDescr: Open the dashboard, choose a lab, prepare, coordinate tasks, find resources, and complete the report.
-    A["OPEN DASHBOARD<br/>See the next deadline"]
-    B["CHOOSE A LAB<br/>Everything in one workspace"]
-    C["PREPARE<br/>Check prerequisites and safety steps"]
-    D["COORDINATE<br/>Assign and complete partner tasks"]
-    E["FIND RESOURCES<br/>Manuals, code, and CAD links"]
-    F["FINISH<br/>Complete report requirements"]
-    A --> B --> C --> D --> E --> F
-    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:3px;
-    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:3px;
-    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:3px;
-    class A,B blue;
-    class C,D,E purple;
-    class F green;
-```
+Diagrams use **16px text instead of 24px**, short labels, dark fills, and bright outlines. Each diagram explains one idea; tables provide the details.
 
-## 2 · The MVP: four features
-
-| Feature | First working version | Done when… |
-| :--- | :--- | :--- |
-| **Lab task checklist** | Add, edit, complete, and delete pre-lab and post-lab tasks. Include prerequisite, safety, and report items. | Progress updates correctly, and saved tasks survive a refresh. |
-| **Partner workspace** | Invite one partner to a lab, assign tasks, and show completion status. | Two signed-in students can access the same lab and see saved updates after refreshing. |
-| **Course resource hub** | Save named links to manuals, code repositories, snippets, and CAD files under a course, optionally attached to a lab. | Students can add, open, edit, and remove resources from the correct course. |
-| **Deadline tracker** | Show lab sessions and report due dates in a sorted agenda with overdue, today, and upcoming labels. | Dates sort correctly, and completed reports stop appearing as overdue. |
-
-**Keep the first release small:** a dated agenda instead of a full calendar; resource links and text snippets instead of file uploads; saved updates visible on refresh instead of live synchronization.
-
-**A local prototype is a milestone.** It can demonstrate the screens and checklist behavior, but real partner sharing requires accounts, a shared database, and access rules. Do not call a browser-only prototype a completed shared workspace.
-
-### Later, after the MVP
-
-- File uploads and previews.
-- Notifications and calendar integrations.
-- Live partner updates without refreshing.
-- More than two students per workspace.
-- Java or C++ tools tied to a specific course need.
-
-## 3 · Technology choices
-
-These are **proposed implementation choices**, not services already configured in this repository.
-
-| Layer | Choice | Why it fits this project |
-| :--- | :--- | :--- |
-| App | Next.js App Router + TypeScript | Keep pages, layouts, and server operations in one project; use types for lab and task data. |
-| Styling | Tailwind CSS + semantic HTML | Build a consistent, responsive dashboard with readable contrast and visible focus states. |
-| Local UI state | Zustand | Manage filters, selected views, and temporary interaction state. |
-| Shared persistent data | Supabase Postgres, proposed | Store courses, labs, memberships, tasks, resources, and deadlines centrally. |
-| Accounts | Supabase Auth, proposed | Identify each student and connect them to the workspaces they can access. |
-| Resource hosting | Existing external links for the MVP | Link to course manuals, GitHub code, and CAD resources without building an upload system. |
-| Deployment | Vercel, proposed | Publish the Next.js demo when the core flows and access rules are verified. |
-
-**Java and C++:** These match the team's coursework and can appear as resource content. The web MVP does not need separate Java or C++ backend services. Add executable tools only if a later feature has a clear need.
-
-**Current comfort:** Java, C++, HTML, CSS, and basic Tailwind CSS.  
-**Learning focus:** Next.js App Router, Zustand, shared data, and account access.
-
-### How the pieces connect
-
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#58A6FF","lineColor":"#E6EDF3","fontSize":"24px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":40,"rankSpacing":55}}}%%
-flowchart TD
-    accTitle: Proposed LabBuddy architecture
-    accDescr: Students use a Next.js interface. Zustand holds temporary UI state. Server operations verify identity and workspace membership before reading or writing shared data. Resource links lead to external files.
-    A["STUDENT BROWSER<br/>Dashboard and lab pages"]
-    B["NEXT.JS + TAILWIND<br/>Screens, forms, and navigation"]
-    C["ZUSTAND<br/>Temporary UI state"]
-    D["SERVER OPERATIONS<br/>Validate input and identity"]
-    E["SUPABASE AUTH<br/>Student accounts"]
-    F["SHARED DATABASE<br/>Membership access rules"]
-    G["RESOURCE LINKS<br/>Manuals, code, and CAD"]
-    A --> B
-    B <--> C
-    B --> D
-    D <--> E
-    D <--> F
-    B --> G
-    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:3px;
-    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:3px;
-    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:3px;
-    class A,B blue;
-    class C,D purple;
-    class E,F,G green;
-```
-
-**State rule:** The database owns saved shared records. Zustand owns temporary UI state; it does not become a second source of truth for partner tasks.
-
-**Access rule:** Every shared read and write must verify lab membership. Database row-level security must enforce the same boundary. Keep privileged secrets out of browser code and Git.
-
-## 4 · Pages and data
-
-| Page | Main job |
+| Decision | Plan |
 | :--- | :--- |
-| **Sign in** | Create an account, sign in, and sign out. |
-| **Dashboard** | Show the next deadlines, active labs, and checklist progress. |
-| **Course** | List course labs and shared course resources. |
-| **Lab workspace** | Show pre-lab/post-lab tasks, assignees, partner membership, and report status. |
-| **Deadlines** | Show a date-sorted agenda with course and status filters. |
+| Website and server hosting | One Cloudflare Worker application, including Static Assets. |
+| Shared database | Cloudflare D1. |
+| Sign-in | Cloudflare Access with approved emails and one-time PIN login for a closed MVP. |
+| Browser code | HTML, CSS, and JavaScript modules. |
+| Java contribution | Optional checklist-template tool; Java Containers backend is a larger alternative. |
+| Delivery strategy | Four features, small issues, and staged completion checks. |
 
-### Data map
+These are proposed choices. No application code or Cloudflare resources have been created by this plan.
 
-One course contains many labs. Each lab has an owner and at most one invited partner for the MVP. Course resources are visible to the course owner and members of labs in that course; a lab-specific resource is visible only to that lab's members.
+## 2 · Our coursework and what it means for this project
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#58A6FF","lineColor":"#E6EDF3","fontSize":"24px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":35,"rankSpacing":55}}}%%
-flowchart TD
-    accTitle: LabBuddy data relationships
-    accDescr: Courses contain labs and resources. Labs contain memberships, tasks, and deadlines. Memberships connect student accounts to labs. Resources can optionally belong to one lab in their course.
-    A["COURSE<br/>Name, code, owner"]
-    B["LAB<br/>Title and instructions"]
-    C["MEMBERSHIP<br/>Student and lab role"]
-    D["TASK<br/>Stage, assignee, completion"]
-    E["DEADLINE<br/>Session or report due date"]
-    F["RESOURCE<br/>Link or text snippet"]
-    G["STUDENT ACCOUNT<br/>Identity and display name"]
-    A -->|"contains"| B
-    A -->|"organizes"| F
-    B -->|"has"| C
-    G -->|"joins through"| C
-    B -->|"contains"| D
-    B -->|"schedules"| E
-    B -.->|"optional attachment"| F
-    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:3px;
-    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:3px;
-    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:3px;
-    class A,B blue;
-    class C,G purple;
-    class D,E,F green;
-```
+Ontario Tech's **2025–2026 and 2026–2027 Software Engineering maps** place ENGR 1200U in first-year winter and SOFE 2710U / SOFE 2800U in second-year fall. Data Structures follows in second-year winter; Data Management Systems comes later. We can use programming/web foundations now and treat SQL as a project learning goal. [2025–2026 map](https://shared.ontariotechu.ca/shared/faculty/feas/documents/25-26-program-maps/software-engineering-2025-2026.pdf), [2026–2027 map](https://shared.ontariotechu.ca/shared/faculty/feas/documents/26-27-program-maps/software-engineering-2026-2027.pdf).
 
-**Data details to settle during setup:**
+**This is a planning inference, not a transcript assessment.** Maps establish course order, not individual mastery. Your description establishes that Java and web programming are near completion. The public academic calendar was inaccessible during research, so the exact current syllabus and weekly progress were not verified.
 
-- Give every record a stable ID; use explicit course and lab references.
-- Create owner membership when creating a lab. Only the owner can manage partner invitations.
-- Invite an existing account by email for the first version. The invited student accepts before receiving access; email delivery is outside MVP scope.
-- Assign tasks only to accepted lab members. Removing a partner removes their access and unassigns their tasks.
-- Store deadline timestamps with timezone information and display them in the student's local timezone. Track report submission separately from checklist completion.
-- Require a resource to contain a valid HTTP(S) URL or a text snippet. Do not execute saved code.
-- Restrict course-wide resource editing to the course owner; lab members can manage resources attached to their own lab.
+| Course / experience | Apply it here | Check or learn during the project |
+| :--- | :--- | :--- |
+| **ENGR 1200U · Introduction to Programming for Engineers** | Use your C++ experience to divide problems into functions, process collections, validate input, and debug. | JavaScript differences and browser events. |
+| **SOFE 2710U · Object Oriented Programming and Design** | Model courses, labs, tasks, and students; divide responsibilities clearly. Apply Java OOP to the optional tool. | Connecting the same concepts across browser, API, and database. |
+| **SOFE 2800U · Web Programming** | Apply the HTML, CSS, forms, and browser programming covered in your course. | Confirm confidence with modules, JSON, HTTP, and asynchronous requests before integration. |
+| **Engineering design and lab experience** | Identify realistic prerequisites, partner duties, safety steps, and report requirements. | Turn needs into small features with observable completion checks. |
 
-## 5 · Build order
+Ontario Tech's public OOP overview includes abstraction, encapsulation, classes, file I/O, debugging, and design diagrams. Those foundations help organize this app. The Java language experience itself is confirmed by you. [Official course overview](https://engineering.ontariotechu.ca/departments/ecse/software-engineering.php).
 
-**Use stages rather than invented calendar dates.** Set dates once the team size and sprint deadline are known. Complete each exit check before moving on.
+We do not need to wait for later courses. We need a few focused exercises for the new integration skills.
+
+## 3 · Problem and student workflow
+
+Lab details are scattered across portals, messages, folders, and repositories. LabBuddy should answer:
+
+- What lab session or report deadline is next?
+- Which preparation steps remain?
+- Which tasks belong to me or my partner?
+- Where are the manual, code, and CAD resources?
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#58A6FF","lineColor":"#E6EDF3","fontSize":"24px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":40,"rankSpacing":55}}}%%
+%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#79C0FF","lineColor":"#E6EDF3","fontSize":"16px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":25,"rankSpacing":30}}}%%
 flowchart TD
-    accTitle: LabBuddy delivery stages
-    accDescr: Agree on scope, build the local checklist flow, add shared accounts and data, complete the resource and deadline features, then validate and prepare the demo.
-    A["1 · FOUNDATION<br/>Scope, roles, and app setup"]
-    B["2 · LOCAL PROTOTYPE<br/>Course, lab, and checklist"]
-    C["3 · SHARED WORKSPACE<br/>Accounts, data, and partners"]
-    D["4 · COMPLETE THE MVP<br/>Resources and deadlines"]
-    E["5 · DEMO READY<br/>Verify, deploy, and rehearse"]
-    A --> B --> C --> D --> E
-    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:3px;
-    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:3px;
-    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:3px;
+    accTitle: Student workflow
+    accDescr: Open the dashboard, select a lab, prepare, coordinate partner tasks, and finish the report.
+    A["Dashboard<br/>Next deadlines"] --> B["Lab workspace<br/>Tasks and resources"]
+    B --> C["Prepare<br/>Finish pre-lab steps"]
+    C --> D["Work together<br/>Assign and complete tasks"]
+    D --> E["Finish<br/>Record report submission"]
+    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:2px;
+    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:2px;
+    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:2px;
     class A,B blue;
     class C,D purple;
     class E green;
 ```
 
-| Stage | Work | Exit check |
+**Example:** In a fictional circuits lab, one student checks equipment and calculations; the partner prepares the report outline. Both use the same workspace. The report deadline stays visible until they record submission. LabBuddy records that status; it does not submit work to the university portal.
+
+## 4 · Four features in the MVP
+
+An **MVP** is the smallest version that delivers the main benefit and can be demonstrated reliably.
+
+| Feature | First version | Completion check |
 | :--- | :--- | :--- |
-| **1 · Foundation** | Confirm team roles and scope. Initialize Next.js, TypeScript, Tailwind, and Zustand. Establish dark theme, navigation, and shared types. Verify the repository remote and set up issues/branches. | App runs locally; everyone can explain the four MVP features and take an assigned issue. |
-| **2 · Local prototype** | Build course and lab creation, checklist editing, progress, empty states, and local persistence. Seed clearly labeled fictional demo data. | One student can create a course and lab, complete tasks, and refresh without losing changes. |
-| **3 · Shared workspace** | Configure accounts and schema. Move saved records to the database. Add membership rules, invitations, assignments, and access checks. | Two accounts share one lab; a third account cannot read or change it. Local prototype data has an explicit reset or migration path. |
-| **4 · Complete the MVP** | Add resource links/snippets, session and report dates, submission status, agenda sorting, and filters. Connect dashboard summaries to real saved data. | All four MVP flows work together using shared persistent data. |
-| **5 · Demo ready** | Resolve bugs, check keyboard/mobile use, verify access rules, document setup, deploy, and practice the pitch. | The demo script passes on the deployed app and the README explains how to run the project. |
+| **Lab checklist** | Create, edit, complete, and delete pre-lab/post-lab tasks. Show completed / total progress. | Progress updates correctly and saved tasks survive refresh. |
+| **Partner workspace** | Share one lab with one accepted partner; assign tasks and show who completed them. | Two signed-in students see saved updates after refresh. A third cannot access the lab. |
+| **Course resource hub** | Group resource links and text snippets by course. Each resource belongs to a specific lab. | Find the correct manual, repository, or CAD link from the lab or course view. |
+| **Deadline tracker** | Save a session time and report due time; show an agenda with overdue/today/upcoming labels. | Dates sort correctly; a submitted report stops appearing as overdue. |
 
-## 6 · Team and collaboration
+**Scope decisions:**
 
-Names and strengths are **not yet decided**. These are responsibility areas, not assumed team members; combine them if the team is small.
+- Start with an agenda list; a calendar grid can follow later.
+- Save links and snippets; file uploads can follow later.
+- Refresh to see partner changes; live updates can follow later.
+- Support an owner plus one partner per lab.
+- Approve testers for the first shared release; public signup is a separate release.
+- Course views include only labs the signed-in student owns or joined.
 
-| Responsibility | Main work | Owner |
+A local-storage prototype is a milestone. Real sharing needs a shared database and permissions; a single-browser prototype does not complete the partner feature.
+
+## 5 · Cloudflare stack, explained
+
+| Piece | What it means | Our use |
 | :--- | :--- | :--- |
-| **Interface and accessibility** | Dashboard, navigation, theme, responsive pages, keyboard support | TBD |
-| **Tasks and app state** | Checklist behavior, progress, forms, UI state | TBD |
-| **Shared data and accounts** | Schema, sign-in, partner invitations, membership access | TBD |
-| **Resources and delivery** | Resource hub, deadlines, integration checks, README, demo | TBD |
+| **HTML + CSS** | Page structure and appearance. | Forms, checklist rows, navigation, responsive layout, and readable dark mode. |
+| **JavaScript modules** | Browser behavior divided into small files. | Events, rendering, filters, and API calls. |
+| **Workers Static Assets** | Cloudflare serves HTML, CSS, and browser scripts. | Host the interface alongside the API. [Docs](https://developers.cloudflare.com/workers/static-assets/). |
+| **Cloudflare Worker** | Server code runs when a request arrives. | Handle API routes, validate requests, check permissions, and query D1. |
+| **Cloudflare D1** | Managed database with SQLite SQL semantics. | Store shared records. [Overview](https://developers.cloudflare.com/d1/). |
+| **Cloudflare Access** | Sign-in gate for approved users. | Admit the team and demo testers. [Workers integration](https://developers.cloudflare.com/workers/configuration/cloudflare-access/). |
+| **Wrangler + npm** | Terminal tools for development and deployment. | Run locally, manage database changes, and deploy. Node.js supports tooling; it is not a separately hosted server. |
+| **Git + GitHub** | Shared history, review, and issue tracking. | Small branches, pull requests, and signed commits. |
 
-**Workflow:** Take one small issue, work on a feature branch, open a focused pull request, and ask a teammate to review before merging. Agree on shared data types before building separate screens. Each contributor verifies their own feature; one person coordinates the final demo.
+**Why simplify the original frontend stack?** A useful dashboard can be built with the team's current web skills. Next.js, React, Zustand, and TypeScript can be evaluated after the first release if the team wants them. Start with ordinary CSS; Tailwind remains an option if everyone can maintain it.
 
-**Repository status:** A local Git repository exists. Remote hosting and team access still need verification; the original proposal's “GitHub link coming soon” should be updated after that check.
+**Data rule:** D1 owns saved shared records. Browser variables own temporary selections and forms. After API integration, local storage is not a second copy of partner data.
 
-## 7 · Risks and responses
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#79C0FF","lineColor":"#E6EDF3","fontSize":"16px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":25,"rankSpacing":30}}}%%
+flowchart TD
+    accTitle: Cloudflare architecture
+    accDescr: Access protects the app. Static Assets serves the interface, and the Worker checks identity and membership before querying D1.
+    A["Student browser"] --> B["Cloudflare Access<br/>Approved sign-in"]
+    B --> C["Static Assets<br/>HTML, CSS, JavaScript"]
+    C -->|"API request"| D["Worker<br/>Identity and permission checks"]
+    D -->|"SQL query"| E["D1<br/>Saved shared records"]
+    E -->|"Result"| D
+    D -->|"JSON response"| C
+    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:2px;
+    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:2px;
+    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:2px;
+    class A,C blue;
+    class B,D purple;
+    class E green;
+```
+
+## 6 · Where Java fits
+
+Java and JavaScript are different languages. Our Java knowledge helps with modeling and tooling, but a normal Java program does not become a browser script or Worker by uploading it.
+
+Cloudflare lists JavaScript, TypeScript, Python, and Rust as first-class Worker languages and offers further language options through WebAssembly. The recommended Worker uses JavaScript rather than adding a Java-to-WebAssembly toolchain. [Worker languages](https://developers.cloudflare.com/workers/languages/).
+
+| Option | Concrete contribution | Extra learning | Fit |
+| :--- | :--- | :--- | :--- |
+| **Java template tool** | Local command-line app creates reusable lab checklist templates and exports JSON. | JSON export and an agreed file format; optional web import validation. | Useful optional Java contribution. |
+| **Java backend on Cloudflare Containers** | A Java HTTP service runs in a container and is reached through a Worker. | Java web endpoints, Docker, container lifecycle, routing, and database integration. | Possible larger alternative after a proof of concept. |
+| **JavaScript web MVP** | Deliver the four features with one browser/server language. | Workers, SQL, and Access integration. | Recommended sprint path. |
+
+Containers can run applications requiring other runtimes, including a Java runtime packaged in an image. They currently require a Workers Paid plan; the documented setup also uses Docker. Check that route before adopting it. [Containers overview](https://developers.cloudflare.com/containers/), [setup requirements](https://developers.cloudflare.com/containers/get-started/).
+
+**Optional Java deliverable:**
+
+1. Model `LabTemplate` and `TemplateTask` using classes and a task collection.
+2. Accept local input or built-in examples; reject empty titles and invalid stages.
+3. Export a JSON file such as `circuits-template.json`.
+4. If web import is added, preview its tasks before applying it to a lab.
+5. Validate imported data again in the Worker and generate new IDs. The file cannot choose owners, memberships, or database IDs.
+
+This connects Java OOP and file handling to a real feature. Keep web import outside the four-feature MVP unless time allows. The local tool needs no Cloudflare credentials.
+
+If Java must power the deployed backend, prove one Java endpoint through Containers before committing to that architecture. Decide which service owns database operations; do not assume D1 provides an ordinary JDBC connection. That alternative changes scope and needs its own estimate.
+
+## 7 · Sign-in and lab permissions
+
+For the closed MVP, enable Access for the application, allow specific tester emails, and explicitly configure **one-time PIN** login. An approved student receives a code by email; we do not build a password database. [PIN setup](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/).
+
+**Two checks have different jobs:** Access decides who may enter the app. Lab membership decides which lab records that person may use.
+
+**Implementation notes for the teammate handling authentication:**
+
+- Protect production and preview entry points.
+- Validate the Access token before using identity. With Static Assets, use the documented `Cf-Access-Jwt-Assertion` validation pattern with `jose`; check signature, issuer, audience, and expiry.
+- Associate the verified subject with a `users` record and save the verified email for invitations.
+- Do not treat a browser-supplied email as proof of identity.
+- Keep authenticated API responses private. Use same-origin requests and reject cross-origin state-changing browser submissions.
+
+Cloudflare documents that Static Assets' internal router does not pass `ctx.access` to the user Worker. This is why the plan includes explicit token validation. [Identity limitations](https://developers.cloudflare.com/workers/configuration/cloudflare-access/#ctxaccess-limitations), [JWT validation](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/).
+
+**Partner flow:**
+
+1. The owner creates a lab and receives owner membership.
+2. The partner is approved in Access and signs in once to create an app profile.
+3. The owner invites that existing account by verified email.
+4. The invitee accepts; the server checks that a partner place is still available.
+5. Both accepted members can manage tasks/resources and assign work to each other.
+6. Only the owner removes the partner; removal ends lab access and clears their task assignments.
+
+An in-app invitation does not add someone to Access. The teammate managing Access approves new testers separately. This is a closed demo design; public onboarding requires a later authentication decision.
+
+**Local development:** Use fictional users selected by server-side local configuration for UI/database work. Keep that development identity path disabled in deployed environments; never let a public request choose its own identity. Test the real Access flow on the protected demo before calling sign-in complete.
+
+## 8 · Screens and expected behavior
+
+Use one application page with sections or hash navigation initially, keeping navigation and refresh behavior simple.
+
+| Section | Content | Actions |
+| :--- | :--- | :--- |
+| **Dashboard** | Upcoming deadlines, active labs, progress | Open a lab; create a course/lab. |
+| **Course** | Accessible labs and their resource links | Open a workspace; find resources. |
+| **Lab workspace** | Tasks, assignees, partner, resources, dates | Manage work; invite partner; record report submission. |
+| **Deadlines** | Sorted sessions and report due dates | Filter by course; open a lab. |
+| **Invitations** | Invitations addressed to the current student | Accept or decline. |
+
+Every list needs an empty state with a next action. Every save needs loading and failure handling. If saving fails, retain entered text and offer retry.
+
+## 9 · Data model
+
+A **table** stores one kind of record. An **ID** identifies a record. A **foreign key** links records. We will learn enough SQL to use these relationships safely.
+
+| Table | Example fields | Job |
+| :--- | :--- | :--- |
+| `users` | `id, access_subject, email, display_name` | Profiles tied to verified identity. |
+| `courses` | `id, owner_id, code, name` | Group the owner's labs. |
+| `labs` | `id, course_id, title, notes, session_at, report_due_at, report_submitted_at` | Workspace and dates. |
+| `lab_members` | `lab_id, user_id, role` | Owner and accepted partner. |
+| `tasks` | `id, lab_id, title, stage, assignee_id, completed_at, completed_by` | Checklist and responsibility. |
+| `resources` | `id, lab_id, title, type, url, snippet` | Links and text snippets. |
+| `invitations` | `id, lab_id, invitee_id, status, created_at` | Invitations before membership. |
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#79C0FF","lineColor":"#E6EDF3","fontSize":"16px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":25,"rankSpacing":30}}}%%
+flowchart TD
+    accTitle: Database relationships
+    accDescr: Courses group labs. Labs have tasks and resources. Student membership grants lab access. Accepted invitations create partner membership.
+    A["Course"] -->|"groups"| B["Lab<br/>Session and report dates"]
+    B --> C["Tasks"]
+    B --> D["Resources"]
+    E["Student"] --> F["Lab membership"]
+    F -->|"grants access"| B
+    G["Accepted invitation"] -->|"creates partner entry"| F
+    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:2px;
+    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:2px;
+    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:2px;
+    class A,B blue;
+    class E,F,G purple;
+    class C,D green;
+```
+
+**Rules to agree on before coding:**
+
+- Only a course owner creates labs under it. Lab creation also creates owner membership.
+- Partners see the course name and joined labs, not every lab in that course.
+- Prevent duplicate memberships. Enforce one owner and at most one partner with constraints and atomic invitation acceptance.
+- Assign tasks only to accepted members. Assignment and completion are separate fields.
+- Check membership for every lab/task/resource request, including direct requests using an ID.
+- Use SQL parameters/prepared statements instead of joining user input into SQL strings.
+- Store dates in UTC; display them in the browser's timezone. Missing dates stay missing.
+- Record report submission separately from task completion.
+- Save HTTP(S) links or plain-text snippets. Do not execute pasted code.
+
+**Progress example:** 3 completed tasks out of 5 = 60%. Zero tasks displays “No tasks yet.”
+
+## 10 · How a click becomes saved data
+
+An **API** is the set of URLs the browser uses to ask the server for data or changes. **JSON** is the data format exchanged.
+
+For a completed task:
+
+1. Send `PATCH /api/tasks/task-id` with `{ "completed": true }`.
+2. The Worker verifies identity, input, and membership in that task's lab.
+3. Update only the intended task and return its saved state.
+4. Update the checkbox and progress from that response. Show retry on failure.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#79C0FF","lineColor":"#E6EDF3","fontSize":"16px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":25,"rankSpacing":30}}}%%
+flowchart TD
+    accTitle: Saving a task
+    accDescr: Check identity, membership, and input before saving. Invalid requests return an error without saving.
+    A["Check task"] --> B["Send PATCH request"]
+    B --> C{"Identity, membership,<br/>and input valid?"}
+    C -->|"Yes"| D["Update task in D1"]
+    D --> E["Show saved state"]
+    C -->|"No"| F["Show error<br/>Keep previous state"]
+    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:2px;
+    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:2px;
+    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:2px;
+    classDef orange fill:#3D2817,stroke:#FFA657,color:#FFFFFF,stroke-width:2px;
+    class A,B blue;
+    class C purple;
+    class D,E green;
+    class F orange;
+```
+
+### Initial API contract
+
+Agree on request/response examples before building separate screens. These endpoints are proposed.
+
+| Request | Job | Permission |
+| :--- | :--- | :--- |
+| `GET /api/me` | Read/create profile after verified sign-in | Approved signed-in user |
+| `GET /api/courses` | Owned courses and summaries for joined labs | Filter to current user |
+| `POST /api/courses` | Create course | Current user becomes owner |
+| `GET /api/labs` | Accessible labs/dates for dashboard and agenda | Membership filter |
+| `POST /api/courses/:id/labs` | Create lab and owner membership | Course owner |
+| `GET /api/labs/:id` | Read lab, tasks, resources | Accepted lab member |
+| `PATCH /api/labs/:id` | Update dates/submission status | Accepted lab member |
+| `POST /api/labs/:id/tasks` | Add task | Accepted lab member |
+| `PATCH /api/tasks/:id` / `DELETE /api/tasks/:id` | Edit, assign, complete, delete | Member of the task's lab |
+| `POST /api/labs/:id/resources` | Add resource | Accepted lab member |
+| `PATCH /api/resources/:id` / `DELETE /api/resources/:id` | Edit/remove resource | Member of the resource's lab |
+| `POST /api/labs/:id/invitations` | Invite existing user | Lab owner |
+| `GET /api/invitations` | List incoming invitations | Addressed invitee |
+| `POST /api/invitations/:id/accept` or `/decline` | Respond | Addressed invitee |
+| `DELETE /api/labs/:id/partner` | Remove partner/clear assignments | Lab owner |
+
+Use consistent errors, such as `{ "error": "Task title is required" }`. Accept only intended writable fields; ordinary task edits cannot change owners or memberships.
+
+## 11 · Suggested project layout
+
+These files are proposed; they do not exist yet.
+
+```text
+LabBuddy/
+  public/
+    index.html              Website structure and sections
+    styles.css              Shared styles and responsive layout
+    js/
+      app.js                Navigation and rendering
+      api.js                Shared requests/error handling
+      checklist.js          Task interactions
+      resources.js          Links/snippets
+      deadlines.js          Agenda/date display
+  server/
+    worker.js               API entry point
+    auth.js                 Identity verification
+    permissions.js          Membership/owner checks
+    routes/                 Feature handlers
+  migrations/
+    0001_initial.sql        Tables, constraints, indexes
+  seed/
+    demo.sql                Fictional development records
+  tools/java/               Optional template tool
+  tests/                    Focused behavior/access tests
+  wrangler.jsonc            Worker, assets, D1 configuration
+  package.json              Development scripts/dependencies
+  .dev.vars.example         Names and safe placeholders
+  .gitignore                Ignore secrets/generated files
+  PLAN.md                   Project plan
+  README.md                 Setup/demo instructions to write later
+```
+
+Start with one Worker, one D1 binding called `DB`, and one static-assets directory. Route `/api/*` through the Worker; unknown API paths must not return the HTML page.
+
+Keep local secrets in ignored files and production secrets in Cloudflare secret configuration. Use separate local and demo data. Administrative tokens never go into browser scripts.
+
+## 12 · Build stages
+
+Set dates once the team confirms available time and the sprint deadline. Each stage has a concrete exit check.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"background":"#0D1117","primaryColor":"#102A43","primaryTextColor":"#FFFFFF","primaryBorderColor":"#79C0FF","lineColor":"#E6EDF3","fontSize":"16px","fontFamily":"Arial"},"flowchart":{"htmlLabels":true,"curve":"linear","nodeSpacing":25,"rankSpacing":30}}}%%
+flowchart TD
+    accTitle: Delivery stages
+    accDescr: Agree on scope, build the local workflow, prove Cloudflare deployment, add persistence and sharing, then complete the demo.
+    A["1. Agree on scope"] --> B["2. Local lab and checklist"]
+    B --> C["3. Cloudflare proof<br/>API, D1, sign-in"]
+    C --> D["4. Shared persistence"]
+    D --> E["5. Partner sharing"]
+    E --> F["6. Complete and demo"]
+    classDef blue fill:#102A43,stroke:#79C0FF,color:#FFFFFF,stroke-width:2px;
+    classDef purple fill:#302047,stroke:#D2A8FF,color:#FFFFFF,stroke-width:2px;
+    classDef green fill:#12382A,stroke:#7EE787,color:#FFFFFF,stroke-width:2px;
+    class A,B blue;
+    class C,D,E purple;
+    class F green;
+```
+
+### Stage 1 · Agree on scope and contracts
+
+- [ ] Sketch screens and select a fictional example lab.
+- [ ] Assign responsibility areas and first issues.
+- [ ] Agree on task fields, dates, endpoint responses, and naming.
+- [ ] Check everyone's Node/npm, Git access, and terminal setup.
+- [ ] Choose a Cloudflare account owner and authorized collaborators.
+
+**Exit:** Every teammate can explain their first issue and its expected inputs/outputs.
+
+### Stage 2 · Build the local workflow
+
+- [ ] Build course/lab forms and the checklist.
+- [ ] Add task edits, completion, deletion, and progress.
+- [ ] Put persistence behind functions such as `listTasks()` and `saveTask()`.
+- [ ] Use fictional local data; local storage is acceptable at this stage.
+- [ ] Handle empty titles, zero tasks, keyboard use, and narrow screens.
+
+**Exit:** Create a lab, complete tasks, and refresh without losing local work. Clearly label this a single-browser prototype.
+
+### Stage 3 · Prove Cloudflare integration early
+
+- [ ] Serve a static page and test API response with Wrangler.
+- [ ] Create a local D1 binding/migration; read and update one record.
+- [ ] Deploy a demo database and Worker.
+- [ ] Enable Access and approved-email PIN sign-in.
+- [ ] Verify a real identity in the Worker and query the remote demo database.
+
+**Exit:** An approved tester signs in and reads a saved demo record; an unapproved tester is blocked. Discover account/deployment issues here before the full UI depends on them.
+
+A **migration** is a versioned SQL file changing database structure. Verify it locally before applying it remotely. [Migration guide](https://developers.cloudflare.com/d1/reference/migrations/).
+
+### Stage 4 · Save the core workflow in D1
+
+- [ ] Implement profile, course, lab, and task endpoints.
+- [ ] Add validation, permission checks, and prepared SQL statements.
+- [ ] Replace prototype persistence functions with API requests.
+- [ ] Seed demo data separately; provide an explicit reset for prototype data.
+- [ ] Add focused tests for saved tasks, denied access, and progress/date calculations.
+
+**Exit:** The owner's lab persists across refresh and a second signed-in browser. An unrelated user cannot read it by ID.
+
+### Stage 5 · Add partner sharing
+
+- [ ] Add invitations to existing approved users, acceptance, and decline.
+- [ ] Enforce the member limit even for simultaneous invitation acceptance.
+- [ ] Assign tasks only to accepted members.
+- [ ] Add owner-only partner removal and assignment cleanup.
+- [ ] Save individual record changes rather than replacing whole labs.
+
+**Exit:** Two members see each other's saved work after refresh. Pending invitees, removed partners, and unrelated users have the correct restricted access.
+
+### Stage 6 · Finish and demonstrate
+
+- [ ] Add resource links/snippets and course grouping.
+- [ ] Add session/report dates, submission status, agenda sorting, and filters.
+- [ ] Check timezone display, empty states, errors, and retries.
+- [ ] Verify mobile/keyboard use and write setup instructions.
+- [ ] Rehearse the deployed demo; add Java tooling only if time allows.
+
+**Exit:** All four features work together on the protected demo. Record any unfinished features honestly.
+
+## 13 · Team responsibilities and Git workflow
+
+Names and strengths remain undecided. These are areas of responsibility, not an assumption about team size. Combine areas for a smaller team; pair on unfamiliar database/access work.
+
+| Area | Concrete work | Useful background | Owner |
+| :--- | :--- | :--- | :--- |
+| **Interface** | Forms, navigation, course/lab screens, responsive styles | HTML/CSS/browser programming | TBD |
+| **Tasks and resources** | Checklist, progress, resource UI, API integration | Functions, objects, events | TBD |
+| **Worker and D1** | Routes, SQL, migrations, permissions | Programming/debugging; SQL is new learning | TBD |
+| **Access and delivery** | Sign-in, date behavior, verification, README, demo | Web programming and organization | TBD |
+| **Optional Java tool** | Template classes, validation, export | Java OOP/file handling | TBD |
+
+Everyone should be able to trace one action from browser to API to database. Avoid leaving sign-in and permissions understood by only one teammate.
+
+1. Take a small issue with an observable completion check.
+2. Use a focused branch, such as `feature/lab-checklist`.
+3. Open a pull request with the resulting behavior and verification.
+4. Ask a teammate to review; discuss data-contract changes before merging.
+5. Merge when relevant checks pass and show the result to the team.
+
+The repository is already on GitHub. Signing is configured on the current machine; teammates configure their own machines separately. Server-side signing enforcement depends on the owner's repository permissions and plan.
+
+## 14 · Learning tasks and risks
+
+| Topic | Small practice task | Ready when… |
+| :--- | :--- | :--- |
+| **JSON / asynchronous requests** | Send a form value to an endpoint and render its response. | Explain loading, success, and failure. |
+| **Workers** | Handle one GET and POST. | Locate validation and response code. |
+| **SQL / D1** | Add/read/update/delete a task; join it to membership. | Explain why one student may edit it and another may not. |
+| **Access** | Sign in and verify identity on an API request. | Distinguish app admission from lab membership. |
+| **Deployment** | Deploy a change and apply a migration to demo data. | Identify local versus remote data. |
+| **Java export, optional** | Export a valid template. | A teammate can reproduce it from the instructions. |
 
 | Risk | Practical response |
 | :--- | :--- |
-| **“Adding features” grows into too much work** | Finish one complete flow first, then add the next MVP feature. Put extras in a backlog. |
-| **New App Router and Zustand concepts slow progress** | Build the local checklist prototype first. Write down which state belongs in the UI and which belongs in the database. |
-| **Partner sharing is harder than it looks** | Introduce accounts and access rules before adding invitation polish. Verify the two-user flow early. |
-| **One student can access another lab by changing an ID** | Enforce membership in server operations and database policies; verify with a separate nonmember account. |
-| **Dates or progress labels are misleading** | Check overdue, today, future, timezone boundaries, and a submitted report separately from checklist status. |
-| **Concurrent edits overwrite changes** | Save individual task changes instead of replacing whole lab records; surface failed saves and refresh current data. Live synchronization can follow later. |
-| **A teammate cannot run the app** | Document environment variable names, setup commands, seed data, and database setup without committing secrets. |
+| Too many tools/features | Finish each stage and keep extras in the backlog. |
+| Unfamiliar database/access work | Pair on a small proof before integrating the whole UI. |
+| A student accesses another lab | Centralize membership checks; test direct API requests with another account. |
+| Concurrent edits overwrite work | Update individual records/fields and surface failed saves. |
+| Java delays the demo | Keep the tool independent; estimate Containers separately. |
+| Dates or progress confuse users | Test zero tasks, UTC/local boundaries, and submitted reports. |
+| Unexpected cloud cost/limits | Check current Workers/D1/Access limits during setup; review Containers before adoption. |
 
-**If time gets tight:** Cut uploads, notifications, live synchronization, and calendar polish first. If shared access cannot be completed, explicitly present a local prototype and record partner sharing as unfinished.
+If time is tight, postpone uploads, notifications, live synchronization, Java import, and calendar polish. If sharing is unfinished, present the completed prototype accurately.
 
-## 8 · Verification and definition of done
+## 15 · Verification and demo
 
-Use focused checks around behavior that can break the student workflow:
+Use automated tests for important permissions and calculations, plus a manual student walkthrough. This document edit does not require application tests; these checks guide implementation.
 
-- [ ] Create, edit, complete, and delete a task; verify progress and persistence.
-- [ ] Accept a partner invitation and assign a task; verify saved changes from both accounts after refresh.
-- [ ] Confirm a pending invite and a nonmember account cannot access lab data, including through direct requests.
-- [ ] Remove a partner; verify access ends and their assigned tasks become unassigned.
-- [ ] Verify resource links/snippets stay under the correct course and lab, with the intended view/edit permissions.
-- [ ] Check overdue, today, future, and submitted report states, including a timezone boundary.
-- [ ] Handle empty lists, invalid forms, loading states, and failed saves with clear messages.
-- [ ] Navigate core screens by keyboard and use them on a narrow mobile viewport.
-- [ ] Pass the project's configured type checks, lint checks, focused behavior tests, and production build.
-- [ ] Run the complete demo on the deployed app and document any known limitations.
+- [ ] Create/edit/complete/delete tasks; verify progress and persistence.
+- [ ] Check zero, some, and all completed tasks.
+- [ ] Reject missing, forged, and expired identity tokens.
+- [ ] Deny lab access to pending invitees and unrelated users, including direct API requests.
+- [ ] Accept an invite and verify saved changes from two browsers.
+- [ ] Prevent simultaneous acceptance from creating a third member.
+- [ ] Remove a partner; verify access and assignment cleanup.
+- [ ] Keep course/resource results limited to accessible labs.
+- [ ] Validate links/snippets and retain entered text after failed saves.
+- [ ] Check overdue/today/future, missing dates, timezone boundaries, and submitted reports.
+- [ ] Navigate by keyboard and on a narrow viewport.
+- [ ] Run configured checks and a deployment dry run, then repeat core flows on the deployed demo.
 
-## 9 · Pitch and demo
+**Three-minute demo:**
 
-**Pitch:** “LabBuddy gives engineering and computer science students one place to prepare for labs, coordinate with a partner, and keep up with report deadlines.”
+1. Explain the scattered-information problem.
+2. Sign in and open a dashboard with two fictional courses.
+3. Complete a preparation task and show progress.
+4. Assign a partner task; refresh the partner browser to show it.
+5. Open a manual or code resource.
+6. Record report submission and show the updated deadline status.
 
-**Suggested three-minute demo:**
+**Pitch:** “LabBuddy helps engineering students prepare for labs, coordinate with a partner, and keep report deadlines visible in one shared workspace.”
 
-1. Open a dashboard with two fictional courses and an upcoming report deadline.
-2. Enter a lab and complete a prerequisite checklist item.
-3. Assign a report task to the partner; show the saved assignment from the partner account.
-4. Open a linked manual or code resource from the course hub.
-5. Mark a report as submitted and show the updated deadline view.
+**Requested workshops:** Git/team collaboration and pitching/demo skills. A Workers + D1 introduction would also help this implementation.
 
-**Requested sprint workshops:**
+## 16 · First team meeting
 
-- **Git and team collaboration:** Branches, focused pull requests, reviews, and resolving merge conflicts.
-- **Pitching and demo skills:** Explain the problem, show the working student journey, and keep within the time limit.
+- [ ] Confirm names, strengths, deadline, and available work sessions.
+- [ ] Agree on the recommended Cloudflare MVP or explicitly choose the larger Java backend route.
+- [ ] Assign first issues and reviewers.
+- [ ] Agree on the example lab and API/data contract.
+- [ ] Select the Cloudflare account owner and approved testers.
+- [ ] Schedule the early deployment/database/sign-in proof.
+- [ ] Record decisions so absent teammates can catch up.
 
-## 10 · First actions
-
-- [ ] Confirm team members, strengths, and responsibility owners.
-- [ ] Confirm sprint deadline and assign dates to the five stages.
-- [ ] Verify GitHub remote, repository visibility, and teammate access.
-- [ ] Agree on the proposed authentication/database service before shared-workspace implementation.
-- [ ] Turn the four MVP features and foundation work into small issues with exit checks.
-- [ ] Start Stage 1, then build the course → lab → checklist flow.
-
----
-
-> **Finish line:** A student and their partner can prepare a lab, divide its tasks, find course resources, and track the report deadline using saved shared data.
+**Finish line:** Two approved students can prepare a lab, divide tasks, find resources, and track the report deadline using saved shared data, while another student cannot access their lab.
